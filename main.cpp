@@ -3,6 +3,7 @@
 #include "Expr.hpp"
 #include "Parser.hpp"
 #include "Product.hpp"
+#include "NestedDFS.hpp"
 #include "SCCProcessor.hpp"
 #include <assert.h>
 #include <fstream>
@@ -17,8 +18,28 @@ int read_number(Parser &parser) {
    return token.number;
 }
 
+int CheckLTLByNestedDFS(std::shared_ptr<TS> ts, std::shared_ptr<NBA> nba) {
+   std::shared_ptr<TS> prod = ProductTSWithNBA(ts, nba);
+   std::shared_ptr<NestedDFSProcessor> proc = std::make_shared<NestedDFSProcessor>(prod->get_node_count());
+   for (int i = 0; i < prod->get_node_count(); ++i) {
+      for (auto &to : prod->get_node(i)->get_transition()) {
+         proc->add_edge(i, to);
+      }
+   }
+   std::vector<int> reachable = proc->reachable_from(prod->get_initial());
+   for (auto &id : reachable) {
+      TSNodePtr node = prod->get_node(id);
+      if (node->get_ap().find("accepting") != node->get_ap().end()) {
+         if (proc->circle_check(id)) {
+            return 0;
+         }
+      }
+   }
+   return 1;
+}
+
 // check if the TS satisfies the LTL formula
-int CheckLTL(std::shared_ptr<TS> ts, std::shared_ptr<NBA> nba) {
+int CheckLTLByScc(std::shared_ptr<TS> ts, std::shared_ptr<NBA> nba) {
    std::shared_ptr<TS> prod = ProductTSWithNBA(ts, nba);
    std::shared_ptr<SCCProcessor> scc = std::make_shared<SCCProcessor>(prod->get_node_count());
    for (int i = 0; i < prod->get_node_count(); ++i) {
@@ -114,7 +135,7 @@ void InputLTL(std::shared_ptr<TS> ts, std::istream &fin) {
    parser.consume_until_endline();
    for (int i = 1; i <= n; ++i) {
       std::shared_ptr<NBA> nba = ParseExprAndTrans(parser);
-      std::cout << CheckLTL(ts, nba) << std::endl;
+      std::cout << CheckLTLByNestedDFS(ts, nba) << std::endl;
    }
    for (int i = 1; i <= m; ++i) {
       token = parser.consume();
@@ -122,7 +143,7 @@ void InputLTL(std::shared_ptr<TS> ts, std::istream &fin) {
       int id = token.number;
       std::shared_ptr<NBA> nba = ParseExprAndTrans(parser);
       std::shared_ptr<TS> new_ts = ts->adjust_initial(id);
-      std::cout << CheckLTL(new_ts, nba) << std::endl;
+      std::cout << CheckLTLByNestedDFS(new_ts, nba) << std::endl;
    }
 }
 
@@ -130,7 +151,7 @@ int main() {
    std::string project_root_dir = std::string(STR(PROJECT_ROOT_DIR));
    project_root_dir = project_root_dir.substr(1, project_root_dir.size() - 2);
    std::string ts_in_path = project_root_dir + "/testcases/TS.txt";
-   std::string ltl_in_path = project_root_dir + "/testcases/benchmark1.txt";
+   std::string ltl_in_path = project_root_dir + "/testcases/sample.txt";
    std::ifstream ts_in(ts_in_path);
    if (!ts_in.is_open()) {
       std::cerr << "Cannot open file " << ts_in_path << std::endl;

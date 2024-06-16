@@ -14,6 +14,8 @@ The codes consists of the following files:
 
 - `Product.cpp` : Calculate the product of NBA and TS.
 
+- `NestedDFS.cpp` : The nested DFS algorithm.
+
 - `SCCProcessor.cpp` : Calculate the strongly connected components of the product by Tarjan's algorithm.
 
 - `Utils.hpp` : Defines the `failwith` macro for debugging.
@@ -28,7 +30,9 @@ It first parses the LTL formula $\varphi$ and converts $\neg\varphi$ into GNBA, 
 
 Then it calculates the product of the NBA and the transition system.
 
-Instead of running the nested DFS, this code uses Tarjan's algorithm. If a node in accepting set is reachable from the initial states and is in a SCC(strongly connected components) that contains a circle(that means the size of SCC >= 2, or the SCC contains a self-loop), then the formula is not satisfied.
+In the end, it uses the nested DFS algorithm to check whether a node in the accepting set is reachable from the initial states and is contained in a circle.
+
+An alternating algorithm of nested DFS is Tarjan's algorithm. If a node in accepting set is reachable from the initial states and is in a SCC(strongly connected components) that contains a circle(that means the size of SCC >= 2, or the SCC contains a self-loop), then the formula is not satisfied.
 
 ### Data Structures
 
@@ -145,6 +149,7 @@ class GNBA : public NBA_base {
  private:
    std::vector<std::set<int>> accepting;
 };
+```
 
 #### Transition System
 
