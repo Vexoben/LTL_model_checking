@@ -32,7 +32,7 @@ Then it calculates the product of the NBA and the transition system.
 
 In the end, it uses the nested DFS algorithm to check whether a node in the accepting set is reachable from the initial states and is contained in a circle.
 
-An alternating algorithm of nested DFS is Tarjan's algorithm. If a node in accepting set is reachable from the initial states and is in a SCC(strongly connected components) that contains a circle(that means the size of SCC >= 2, or the SCC contains a self-loop), then the formula is not satisfied.
+An alternating algorithm of nested DFS is Tarjan's algorithm. If a node in accepting set is reachable from the initial states and is in a SCC(strongly connected components) that contains a circle(that means the size of SCC >= 2, or the SCC contains a self-loop), then the formula is not satisfied. Both nested DFS and Tarjan's algorithm are implemented.  
 
 ### Data Structures
 
@@ -152,6 +152,8 @@ class GNBA : public NBA_base {
 ```
 
 #### Transition System
+
+Actions are not recorded in the transition system since the algorithm only needs to know the set of atomic propositions of the state.
 
 ```cpp
 // Some code is omitted for brevity
